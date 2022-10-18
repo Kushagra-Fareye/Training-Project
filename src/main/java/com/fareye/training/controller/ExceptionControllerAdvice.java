@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class ExceptionControllerAdvice {
 
-    @ExceptionHandler({Exception.class})
-    public void handleException(){
+    @ExceptionHandler({ Exception.class })
+    public void handleException() {
         System.out.println("Reached exception handler");
     }
 }
