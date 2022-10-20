@@ -3,6 +3,7 @@ package com.fareye.training.controller;
 import com.fareye.training.model.Todo;
 import com.fareye.training.model.User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import java.time.LocalDateTime;
@@ -44,18 +45,19 @@ public class UserController {
         if (users.containsKey(userId)) {
             return users.get(userId);
         }
-        throw new Exception("User not found.");
+        return new User();
     }
 
     @PostMapping("/user")
-    public Collection<User> createUser(@Valid @RequestBody User user) {
+    public User createUser(@Valid @RequestBody User user) {
         user.setPassword(passwordEncryptor(user.getPassword()));
         user.setId(id);
         user.setCreated(LocalDateTime.now());
         user.setName(user.getFirstName() + ' ' + user.getLastName());
+        user.setAvatar_url(this.getUserAvatar(user.getUserName()));
         users.put(id, user);
         id = id + 1;
-        return users.values();
+        return user;
     }
 
     @GetMapping("/exceptionapi2")
@@ -68,7 +70,7 @@ public class UserController {
         if (users.containsKey(userId)) {
             List<Todo> todosFromUser = TodoController.getAllTodosForUser(userId);
             for (Todo todo : todosFromUser) {
-                TodoController._deleteTodo(todo.getId());
+                TodoController._deleteTodo(todo.getId(), todo.getTitle());
             }
             users.remove(userId);
             return "Deleted Successfully.";
@@ -84,5 +86,17 @@ public class UserController {
             return "Updated Successfully.";
         }
         throw new Exception("User Not Found.");
+    }
+
+    @GetMapping("/user/avatar")
+    public String getUserAvatar(@RequestParam String userName) {
+        String url = "https://api.github.com/users/" + userName;
+        RestTemplate restTemplate = new RestTemplate();
+        User userDetails = restTemplate.getForObject(url, User.class);
+        return userDetails.getAvatar_url();
+    }
+
+    public long addTwoNumber(long a, long b) {
+        return a + b;
     }
 }

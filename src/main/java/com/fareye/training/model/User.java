@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 enum Role {
     USER,
@@ -15,6 +16,7 @@ enum Role {
 
 @Getter
 @Setter
+@ToString
 public class User {
     private Integer id;
     @NotNull
@@ -35,4 +37,6 @@ public class User {
     private String bloodGroup;
     private String company;
     private String phoneNumber;
+    private String avatar_url;
+    private String userName;
 }

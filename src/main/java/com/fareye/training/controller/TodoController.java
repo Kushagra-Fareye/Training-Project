@@ -22,8 +22,10 @@ public class TodoController {
 
     private Integer id = 1;
     private static Map<Integer, Todo> todos = new HashMap<>();
+    public static List<String> titles = new ArrayList<>();
 
-    public static void _deleteTodo(Integer todoId) {
+    public static void _deleteTodo(Integer todoId, String title) {
+        titles.remove(title);
         todos.remove(todoId);
     }
 
@@ -38,10 +40,10 @@ public class TodoController {
     }
 
     @GetMapping("/todo")
-    public Todo getTodo(@RequestParam Integer todoId) throws Exception {
+    public Todo getTodo(@RequestParam Integer todoId) {
         if (todos.containsKey(todoId))
             return todos.get(todoId);
-        throw new Exception("No Todo Found.");
+        return new Todo();
     }
 
     @GetMapping("/todos")
@@ -50,19 +52,20 @@ public class TodoController {
     }
 
     @PostMapping("/todo")
-    public Collection<Todo> createTodo(@Valid @RequestBody Todo todo) throws Exception {
+    public Todo createTodo(@Valid @RequestBody Todo todo) throws Exception {
         todo.setUser(UserController.getUser(todo.getUserId()));
         todo.setCreatedDate(LocalDateTime.now());
         todo.setId(id);
         todos.put(id, todo);
         id = id + 1;
-        return todos.values();
+        return todo;
     }
 
     @DeleteMapping("/delete/todo")
     public String deleteTodo(@RequestParam Integer todoId) {
         if (todos.containsKey(todoId)) {
-            _deleteTodo(todoId);
+            Todo todo = this.getTodo(todoId);
+            _deleteTodo(todo.getId(), todo.getTitle());
             return "Deleted Successfully.";
         }
         return "Not Found.";
@@ -71,6 +74,10 @@ public class TodoController {
     @PutMapping("/update/todo")
     public String updateTodo(@RequestParam Integer todoId, @RequestBody Todo todo) throws Exception {
         if (todos.containsKey(todoId)) {
+            Todo oldTodo = todos.get(todoId);
+            titles.remove(oldTodo.getTitle());
+            titles.add(todo.getTitle());
+            todos.remove(todoId);
             todos.put(todoId, todo);
             return "Updated Successfully.";
         }
