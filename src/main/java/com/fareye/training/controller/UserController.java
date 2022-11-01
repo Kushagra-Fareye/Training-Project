@@ -1,7 +1,8 @@
 package com.fareye.training.controller;
 
-import com.fareye.training.model.Todo;
 import com.fareye.training.model.User;
+import com.fareye.training.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -16,6 +17,9 @@ import javax.validation.Valid;
 
 @RestController
 public class UserController {
+
+    @Autowired
+    UserService userService;
     private Integer id = 1;
     private static Map<Integer, User> users = new HashMap<>();
 
@@ -30,22 +34,15 @@ public class UserController {
         return BCrypt.hashpw(plainPassword, BCrypt.gensalt(10));
     }
 
-    @GetMapping("/")
-    public String hello(@RequestParam String name) {
-        return "Hello " + name;
-    }
-
     @GetMapping("/users")
     public Collection<User> getUsers() {
-        return users.values();
+        return userService.getAllUsers();
     }
 
     @GetMapping("/user")
-    public static User getUser(@RequestParam Integer userId) throws Exception {
-        if (users.containsKey(userId)) {
-            return users.get(userId);
-        }
-        return new User();
+    public List<User> getUser(@RequestParam Integer userId) throws Exception {
+        return userService.findUserByUserId(userId);
+
     }
 
     @PostMapping("/user")
@@ -57,6 +54,7 @@ public class UserController {
         user.setAvatar_url(this.getUserAvatar(user.getUserName()));
         users.put(id, user);
         id = id + 1;
+        userService.addUser(user);
         return user;
     }
 
@@ -67,30 +65,23 @@ public class UserController {
 
     @DeleteMapping("/delete/user")
     public String deleteUser(@RequestParam Integer userId) {
-        if (users.containsKey(userId)) {
-            List<Todo> todosFromUser = TodoController.getAllTodosForUser(userId);
-            for (Todo todo : todosFromUser) {
-                TodoController._deleteTodo(todo.getId(), todo.getTitle());
-            }
-            users.remove(userId);
-            return "Deleted Successfully.";
-        }
-        return "Not Found.";
+        userService.deleteUser(userId);
+        return "Successful";
     }
 
     @PutMapping("/update/user")
-    public String updateTodo(@RequestParam Integer userId, @RequestBody User user) throws Exception {
-        if (users.containsKey(userId)) {
-            user.setName(user.getFirstName() + ' ' + user.getLastName());
-            users.put(userId, user);
-            return "Updated Successfully.";
-        }
-        throw new Exception("User Not Found.");
+    public User updateTodo(@RequestParam Integer userId, @RequestBody User user) throws Exception {
+
+        return userService.updateUser(user, userId);
     }
 
     @GetMapping("/user/avatar")
     public String getUserAvatar(@RequestParam String userName) {
         String url = "https://api.github.com/users/" + userName;
+        return makeAPIcall(url);
+    }
+
+    public String makeAPIcall(String url) {
         RestTemplate restTemplate = new RestTemplate();
         User userDetails = restTemplate.getForObject(url, User.class);
         return userDetails.getAvatar_url();

@@ -1,13 +1,17 @@
 package com.fareye.training.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.stereotype.Repository;
 
 enum Role {
     USER,
@@ -17,26 +21,31 @@ enum Role {
 @Getter
 @Setter
 @ToString
+@Entity
+@Repository
+@Table(name = "user_details")
 public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
+
     @NotNull
     private String firstName;
     @NotNull
     private String lastName;
     @Email
     private String email;
-    private Boolean verified;
     private LocalDateTime created;
-    private LocalDateTime modified;
     @NotNull
     private String password;
     private String name;
-    private Role role;
-    private Boolean active;
     private Integer age;
     private String bloodGroup;
-    private String company;
     private String phoneNumber;
     private String avatar_url;
     private String userName;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Todo> todoList = new ArrayList<>();
 }

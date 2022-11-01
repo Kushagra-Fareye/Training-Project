@@ -1,5 +1,7 @@
 package com.fareye.training.controller;
 
+import com.fareye.training.service.TodoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +22,8 @@ import javax.validation.Valid;
 @RestController
 public class TodoController {
 
+    @Autowired
+    TodoService todoService;
     private Integer id = 1;
     private static Map<Integer, Todo> todos = new HashMap<>();
     public static List<String> titles = new ArrayList<>();
@@ -32,7 +36,7 @@ public class TodoController {
     public static List<Todo> getAllTodosForUser(Integer userId) {
         List<Todo> todosFromUser = new ArrayList<>();
         for (Todo todo : todos.values()) {
-            if (todo.getUserId() == userId) {
+            if (todo.getUser().getId() == userId) {
                 todosFromUser.add(todo);
             }
         }
@@ -40,47 +44,33 @@ public class TodoController {
     }
 
     @GetMapping("/todo")
-    public Todo getTodo(@RequestParam Integer todoId) {
-        if (todos.containsKey(todoId))
-            return todos.get(todoId);
-        return new Todo();
+    public List<Todo> getTodo(@RequestParam Integer todoId) {
+        return todoService.findTodoByTodoId(todoId);
     }
 
     @GetMapping("/todos")
     public Collection<Todo> getTodos() {
-        return todos.values();
+        return todoService.getAllTodos();
     }
 
     @PostMapping("/todo")
     public Todo createTodo(@Valid @RequestBody Todo todo) throws Exception {
-        todo.setUser(UserController.getUser(todo.getUserId()));
-        todo.setCreatedDate(LocalDateTime.now());
         todo.setId(id);
+        todo.setCreatedDate(LocalDateTime.now());
         todos.put(id, todo);
+        todoService.addTodo(todo);
         id = id + 1;
         return todo;
     }
 
     @DeleteMapping("/delete/todo")
     public String deleteTodo(@RequestParam Integer todoId) {
-        if (todos.containsKey(todoId)) {
-            Todo todo = this.getTodo(todoId);
-            _deleteTodo(todo.getId(), todo.getTitle());
-            return "Deleted Successfully.";
-        }
-        return "Not Found.";
+        todoService.deleteTodo(todoId);
+        return "Successful";
     }
 
     @PutMapping("/update/todo")
-    public String updateTodo(@RequestParam Integer todoId, @RequestBody Todo todo) throws Exception {
-        if (todos.containsKey(todoId)) {
-            Todo oldTodo = todos.get(todoId);
-            titles.remove(oldTodo.getTitle());
-            titles.add(todo.getTitle());
-            todos.remove(todoId);
-            todos.put(todoId, todo);
-            return "Updated Successfully.";
-        }
-        throw new Exception("Todo Not Found.");
+    public Todo updateTodo(@RequestParam Integer todoId, @RequestBody Todo todo) throws Exception {
+        return todoService.updateTodo(todo, todoId);
     }
 }

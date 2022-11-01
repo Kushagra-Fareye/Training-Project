@@ -2,13 +2,20 @@ package com.fareye.training.controller;
 
 import com.fareye.training.model.User;
 import org.junit.jupiter.api.Test;
-
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.web.client.RestTemplate;
-
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 public class UserControllerTest {
+
+    @Spy
+    UserController userController;
 
     @Test
     public void twoPlusTwoIsFour() {
@@ -30,14 +37,17 @@ public class UserControllerTest {
         user.setLastName("Singh");
         user.setEmail("temp@gmail.com");
         user.setPassword("password");
-        user.setCompany("FarEye");
         user.setAge(20);
         user.setUserName("Kushagra-Fareye");
+        Mockito.when(userController.makeAPIcall("https://api.github.com/users/Kushagra-Fareye"))
+                .thenReturn("SONYBHUNJKM");
         User addedUser = restTemplate.postForObject("http://localhost:8081/user", user, User.class);
+
         assertEquals(user.getLastName(), addedUser.getLastName());
         assertEquals(user.getEmail(), addedUser.getEmail());
         assertEquals(user.getFirstName(), addedUser.getFirstName());
-        restTemplate.delete("http://localhost:8081/delete/user?userId=" + addedUser.getId());
+        // restTemplate.delete("http://localhost:8081/delete/user?userId=" +
+        // addedUser.getId());
     }
 
     @Test
@@ -50,7 +60,8 @@ public class UserControllerTest {
         user.setPassword("password");
         user.setUserName("Kushagra-Fareye");
         User addedUser = restTemplate.postForObject("http://localhost:8081/user", user, User.class);
-        User fetchedUser = restTemplate.getForObject("http://localhost:8081/user?userId=" + addedUser.getId(), User.class);
+        User fetchedUser = restTemplate.getForObject("http://localhost:8081/user?userId=" + addedUser.getId(),
+                User.class);
         assertEquals(addedUser.getFirstName(), fetchedUser.getFirstName());
         assertEquals(addedUser.getEmail(), fetchedUser.getEmail());
         assertEquals(addedUser.getFirstName(), fetchedUser.getFirstName());
@@ -66,12 +77,12 @@ public class UserControllerTest {
         user.setLastName("Singh");
         user.setEmail("temp@gmail.com");
         user.setPassword("password");
-        user.setCompany("FarEye");
         user.setAge(20);
         user.setUserName("Kushagra-Fareye");
         User addedUser = restTemplate.postForObject("http://localhost:8081/user", user, User.class);
         restTemplate.delete("http://localhost:8081/delete/user?userId=" + addedUser.getId());
-        User fetchedUser = restTemplate.getForObject("http://localhost:8081/user?userId=" + addedUser.getId(), User.class);
+        User fetchedUser = restTemplate.getForObject("http://localhost:8081/user?userId=" + addedUser.getId(),
+                User.class);
         assertEquals(null, fetchedUser.getFirstName());
         assertEquals(null, fetchedUser.getEmail());
         assertEquals(null, fetchedUser.getFirstName());
@@ -107,14 +118,14 @@ public class UserControllerTest {
         user.setLastName("Singh");
         user.setEmail("temp@gmail.com");
         user.setPassword("password");
-        user.setCompany("FarEye");
         user.setAge(20);
         user.setUserName("Kushagra-Fareye");
         User addedUser = restTemplate.postForObject("http://localhost:8081/user", user, User.class);
         addedUser.setFirstName("updated");
         addedUser.setEmail("updated@gmail.com");
         restTemplate.put("http://localhost:8081/update/user?userId=" + addedUser.getId(), addedUser);
-        User fetchedUser = restTemplate.getForObject("http://localhost:8081/user?userId=" + addedUser.getId(), User.class);
+        User fetchedUser = restTemplate.getForObject("http://localhost:8081/user?userId=" + addedUser.getId(),
+                User.class);
         assertEquals(addedUser.getFirstName(), fetchedUser.getFirstName());
         assertEquals(addedUser.getEmail(), fetchedUser.getEmail());
         restTemplate.delete("http://localhost:8081/delete/user?userId=" + addedUser.getId());
