@@ -51,10 +51,12 @@ public class WebSecurityConfig {
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         return new UserDetailsService() {
             @Override
-            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//                com.fareye.training.model.User customUser = userRepository.findById(2).get();
-                UserDetails user = User.withUsername("user")
-                        .password(passwordEncoder.encode("password"))
+            public UserDetails loadUserByUsername(String email){
+                System.out.println(email);
+                com.fareye.training.model.User user1 = userRepository.findByEmail(email);
+                System.out.println("username");
+                UserDetails user = User.withUsername(user1.getFirstName())
+                        .password(passwordEncoder.encode(user1.getPassword()))
                         .roles("USER")
                         .build();
 
@@ -63,7 +65,7 @@ public class WebSecurityConfig {
                         .roles("USER", "ADMIN")
                         .build();
 
-                return username.equals("admin") ? admin : user;
+                return email.equals("admin") ? admin : user;
             }
         };
     }

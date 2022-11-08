@@ -33,6 +33,7 @@ public class User {
     @NotNull
     private String lastName;
     @Email
+    @Column(unique = true)
     private String email;
     private LocalDateTime created;
     @NotNull
