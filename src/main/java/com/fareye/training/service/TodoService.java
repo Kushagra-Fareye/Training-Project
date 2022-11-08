@@ -14,7 +14,7 @@ public class TodoService {
     TodoRepository todoRepository;
 
     public void addTodo(Todo todo) {
-        todoRepository.save(todo);
+        todoRepository.saveAndFlush(todo);
     }
 
     public void deleteTodo(Integer todoId) {

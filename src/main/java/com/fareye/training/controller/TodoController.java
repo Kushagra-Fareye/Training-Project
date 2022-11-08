@@ -1,5 +1,7 @@
 package com.fareye.training.controller;
 
+import com.fareye.training.dto.TodoRequestDto;
+import com.fareye.training.repository.UserRepository;
 import com.fareye.training.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,13 +19,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Valid;
-
 @RestController
+@CrossOrigin
 public class TodoController {
 
     @Autowired
     TodoService todoService;
+
+    @Autowired
+    UserRepository userRepository;
+
     private Integer id = 1;
     private static Map<Integer, Todo> todos = new HashMap<>();
     public static List<String> titles = new ArrayList<>();
@@ -54,13 +59,21 @@ public class TodoController {
     }
 
     @PostMapping("/todo")
-    public Todo createTodo(@Valid @RequestBody Todo todo) throws Exception {
-        todo.setId(id);
-        todo.setCreatedDate(LocalDateTime.now());
-        todos.put(id, todo);
-        todoService.addTodo(todo);
-        id = id + 1;
-        return todo;
+    public TodoRequestDto createTodo( @RequestBody TodoRequestDto todoRequestDto) throws Exception {
+        try {
+            Todo todo=new Todo();
+
+            todo.setCreatedDate(LocalDateTime.now());
+            todo.setTitle(todoRequestDto.getTitle());
+            todo.setBody(todoRequestDto.getBody());
+            todo.setUser(userRepository.findById(todoRequestDto.getUser_id()).get());
+            todos.put(id, todo);
+            todoService.addTodo(todo);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return todoRequestDto;
     }
 
     @DeleteMapping("/delete/todo")

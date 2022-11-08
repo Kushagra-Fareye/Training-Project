@@ -1,8 +1,6 @@
 package com.fareye.training.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -44,8 +42,8 @@ public class User {
     private String bloodGroup;
     private String phoneNumber;
     private String avatar_url;
+    @Column(unique = true)
+    @NotNull
     private String userName;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Todo> todoList = new ArrayList<>();
 }

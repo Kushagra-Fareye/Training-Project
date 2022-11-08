@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.validation.Valid;
 
 @RestController
+@CrossOrigin
 public class UserController {
 
     @Autowired
